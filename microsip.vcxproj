@@ -22,7 +22,8 @@
     <ProjectGuid>{BB46A3FD-3E25-44BF-9DED-36A8E838A095}</ProjectGuid>
     <RootNamespace>microsip</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>IntSol</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -30,26 +31,26 @@
     <UseOfMfc>Static</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>Static</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -241,8 +242,10 @@
     <ClCompile Include="Contacts.cpp" />
     <ClCompile Include="Dialer.cpp" />
     <ClCompile Include="FeatureCodesDlg.cpp" />
+    <ClCompile Include="FileUtils.cpp" />
     <ClCompile Include="global.cpp" />
     <ClCompile Include="IconButton.cpp" />
+    <ClCompile Include="IntSolProvision.cpp" />
     <ClCompile Include="jumplist.cpp" />
     <ClCompile Include="lib\CListCtrl_ToolTip.cpp" />
     <ClCompile Include="lib\CMask.cpp" />
@@ -295,8 +298,10 @@
     <ClInclude Include="define.h" />
     <ClInclude Include="Dialer.h" />
     <ClInclude Include="FeatureCodesDlg.h" />
+    <ClInclude Include="FileUtils.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="IconButton.h" />
+    <ClInclude Include="IntSolProvision.h" />
     <ClInclude Include="jumplist.h" />
     <ClInclude Include="lib\CListCtrl_LabelTip.h" />
     <ClInclude Include="lib\CListCtrl_ToolTip.h" />

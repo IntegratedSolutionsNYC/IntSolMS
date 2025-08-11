@@ -75,7 +75,9 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", _GLOBAL_COMPANY
-            VALUE "LegalCopyright", "Copyright (c) 2011-2025, MicroSIP (www.microsip.org). All rights reserved."
+            VALUE "LegalCopyright",
+                "Copyright (c) 2025 " _GLOBAL_COMPANY " (" _GLOBAL_WEBSITE "). All rights reserved.\n"
+                "Copyright (c) 2011-2025, MicrSIP (www.microsip.org). All rights reserved."
             VALUE "FileDescription", _GLOBAL_NAME
             VALUE "FileVersion", _GLOBAL_VERSION
             VALUE "InternalName", _GLOBAL_NAME

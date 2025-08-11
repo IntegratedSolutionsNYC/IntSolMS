@@ -61,9 +61,9 @@
 #define _GLOBAL_SETT_AA_DEFAULT "button"
 
 #define _GLOBAL_BUSINESS_FEATURE "This feature is not available in the free version."
-#define _GLOBAL_MENU_WEBSITE "http://www.microsip.org/"
-#define _GLOBAL_MENU_HELP "http://www.microsip.org/help"
-#define _GLOBAL_HELP_WEBSITE "http://www.microsip.org/help"
+#define _GLOBAL_MENU_WEBSITE "https://pbx.solutionsdx.com/"
+#define _GLOBAL_MENU_HELP "https://pbx.solutionsdx.com/instolms-manual.html"
+#define _GLOBAL_HELP_WEBSITE "https://pbx.solutionsdx.com/instolms-manual.html"
 
 #define _GLOBAL_EC_DEFAULT "1"
 

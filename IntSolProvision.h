@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2011-2025 MicroSIP (http://www.microsip.org)
+ * Copyright (C) 2025 Integrated Solutions (https://www.solutionsdx.com)
  *
  * This program is free software; you can redistribute it and/or modify
- * it unbodr the terms of the GNU General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
@@ -13,14 +13,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ * Ardavan Hashemzadeh
  */
-
 #pragma once
-#define _GLOBAL_VERSION "3.21.6"
-#define _GLOBAL_VERSION_COMMA 3,21,6,0
-#define _GLOBAL_KEY "*********"
-// #define _GLOBAL_VIDEO
-#define _GLOBAL_NAME "IntSol"
-#define _GLOBAL_COMPANY "Integrated Solutions"
-#define _GLOBAL_WEBSITE "https://pbx.solutionsdx.com"
+#include <string>
+#include <atomic>
+
+extern std::atomic<bool> g_server_cancelled;
+int get_available_port();
+std::string start_one_shot_server(int port);

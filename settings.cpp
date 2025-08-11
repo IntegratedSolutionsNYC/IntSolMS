@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2025 Integrated Solutions (http://www.solutionsdx.com)
  * Copyright (C) 2011-2024 MicroSIP (http://www.microsip.org)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,16 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * Contributors:
+ * MicroSIP Team
+ * Ardavan Hashemzadeh (Provisioning logic)
  */
 
 #include "stdafx.h"
 #include "settings.h"
 #include "Crypto.h"
+#include "FileUtils.h"
+#include "IntSolProvision.h"
 
 #include <algorithm>
 #include <vector>
 
 #include <Msi.h>
+#include <json.h>
 #pragma comment(lib, "Msi.lib")
 
 AccountSettings accountSettings;
@@ -99,6 +107,10 @@ void AccountSettings::Init()
 	fileName = fileName.Mid(0, fileName.ReverseFind('.'));
 	logFile.Format(_T("%s_log.txt"), fileName);
 	iniFile.Format(_T("%s.ini"), fileName);
+    CString appDataPath(GetAppDataPath().c_str());
+    if (!appDataPath.IsEmpty() && appDataPath.Right(1) != _T("\\")) {
+        appDataPath += _T("\\");
+    }
 	pathRoaming = _T("");
 	pathLocal = _T("");
 
@@ -180,7 +192,7 @@ void AccountSettings::Init()
 		else {
 			// portable
 			isPortable = true;
-			pathRoaming = pathExe + _T("\\");
+            pathRoaming = appDataPath + _T("\\");
 			pathLocal = pathRoaming;
 			logFile = pathLocal + logFile;
 		}
@@ -200,7 +212,7 @@ void AccountSettings::Init()
 		}
 		if (!::PathFileExists(iniFile) || FileSize(iniFile) == 0) {
 			firstRun = true;
-			// create UTF16-LE BOM(FFFE)
+            // create UTF16-LE BOM(FFFE)
 			WORD wBOM = 0xFEFF;
 			CString pszSectionB = _T("[Settings]");
 			CFile file;
@@ -210,7 +222,7 @@ void AccountSettings::Init()
 				file.Write(pszSectionB.GetBuffer(), pszSectionB.GetLength() * sizeof(wchar_t));
 				file.Close();
 			}
-		}
+        }
 		else {
 			firstRun = false;
 			CFile file;
@@ -258,7 +270,106 @@ void AccountSettings::Init()
 			}
 		}
 	}
-	//--
+    
+    bool provisioningEnabled = true;
+    if (provisioningEnabled) {
+        // Start a one-shot server and get JSON payload
+        std::string provisioning_endpoint = "https://provision.solutionsdx.com/app/open_id/intsolmsp.php"; //hardcoding this value for now
+        int port = get_available_port();
+        if (port <= 0) {
+            AfxMessageBox(_T("Failed to find an available port for provisioning server."));
+            return;
+        }
+        else {
+            std::string logout_url = "\"https://integratedsolutionsiam.b2clogin.com/integratedsolutionsiam.onmicrosoft.com/B2C_1A_SIGNUP_SIGNIN/oauth2/v2.0/logout?p=B2C_1A_SIGNUP_SIGNIN&post_logout_redirect_uri=https://portal.solutionsdx.com/\"";
+            std::string url = provisioning_endpoint + "?port=" + std::to_string(port);
+            std::string cmd = "start \" \" " + logout_url + " & start " + url;
+            system(cmd.c_str());
+        }
+
+        std::string jsonPayload = start_one_shot_server(port);
+
+        // Show the body in a message box
+        // MessageBoxA(NULL, jsonPayload.c_str(), "Received Payload", MB_OK | MB_ICONINFORMATION);
+
+        // Parse JSON and set fields
+        Json::Value root;
+        Json::Reader reader;
+        CString section = _T("Account");
+
+        if (reader.parse(jsonPayload, root)) {
+            // --- Accounts ---
+            if (root.isMember("accounts") && root["accounts"].isArray()) {
+                const Json::Value& accounts = root["accounts"];
+                for (size_t i = 0; i < accounts.size(); ++i) {
+                    CString section;
+                    section.Format(_T("Account%d"), i + 1);
+                    const Json::Value& acc = accounts[i];
+
+                    auto writeField = [&](const char* jsonKey, const TCHAR* iniKey) {
+                        if (acc.isMember(jsonKey)) {
+                            CString value(acc[jsonKey].asCString());
+                            WritePrivateProfileString(section, iniKey, value, iniFile);
+                        }
+                        };
+
+                    writeField("label", _T("label"));
+                    writeField("server", _T("server"));
+                    writeField("proxy", _T("proxy"));
+                    writeField("domain", _T("domain"));
+                    writeField("username", _T("username"));
+                    writeField("displayName", _T("displayName"));
+                    writeField("voicemailNumber", _T("voicemailNumber"));
+                    writeField("transport", _T("transport"));
+
+                    if (acc.isMember("password")) {
+                        CString password(acc["password"].asCString());
+                        CString encrypted = IniEncrypt(password);
+                        WritePrivateProfileString(section, _T("password"), encrypted, iniFile);
+                    }
+                    if (acc.isMember("voicemailPassword")) {
+                        CString vmpass(acc["voicemailPassword"].asCString());
+                        CString encrypted = IniEncrypt(vmpass);
+                        WritePrivateProfileString(section, _T("voicemailPassword"), encrypted, iniFile);
+                    }
+                }
+            }
+
+            // --- Settings ---
+            if (root.isMember("settings") && root["settings"].isObject()) {
+                CString section = _T("Settings");
+                const Json::Value& settings = root["settings"];
+                for (Json::ValueConstIterator it = settings.begin(); it != settings.end(); ++it) {
+                    CString key(it.key().asCString());
+                    CString value((*it).asCString());
+                    WritePrivateProfileString(section, key, value, iniFile);
+                }
+            }
+
+            // --- Shortcuts ---
+            if (root.isMember("shortcuts") && root["shortcuts"].isArray()) {
+                WritePrivateProfileSection(_T("Shortcuts"), NULL, iniFile); // clear section
+                const Json::Value& shortcutsJson = root["shortcuts"];
+                for (size_t i = 0; i < shortcutsJson.size(); ++i) {
+                    const Json::Value& sc = shortcutsJson[i];
+                    CString key;
+                    key.Format(_T("%d"), static_cast<int>(i));
+
+                    // Compose shortcut string using your ShortcutEncode logic  
+                    CString shortcutStr;
+                    shortcutStr.Format(_T("%s;%s;%s;%s;%d"),
+                        sc.get("label", "").asCString(),
+                        sc.get("number", "").asCString(),
+                        sc.get("type", "").asCString(),
+                        sc.get("number2", "").asCString(),
+                        sc.get("presence", false).asBool() ? 1 : 0
+                    );
+                    WritePrivateProfileString(_T("Shortcuts"), key, shortcutStr, iniFile);
+                }
+            }
+        }
+    }
+    //--
 
 	CString section;
 	section = _T("Settings");

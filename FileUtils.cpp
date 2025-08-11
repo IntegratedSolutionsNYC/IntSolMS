@@ -1,0 +1,40 @@
+/*
+ * Copyright (C) 2025 Integrated Solutions (https://www.solutionsdx.com)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ * Contributors:
+ * Ardavan Hashemzadeh
+ */
+
+#include "FileUtils.h"
+#include <windows.h>
+#include <shlobj.h>
+#include <direct.h>
+#include <const.h>
+
+std::string GetAppDataPath() {
+    char path[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, path))) {
+        std::string fullPath = std::string(path) + "\\" + _GLOBAL_NAME + "\\";
+        _mkdir(fullPath.c_str());
+        return fullPath;
+    }
+    return "";
+}
+
+void EnsureDirectoryExists(const std::string& dir) {
+    _mkdir(dir.c_str());
+}
