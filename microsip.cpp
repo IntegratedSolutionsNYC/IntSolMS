@@ -333,3 +333,17 @@ BOOL CmicrosipApp::InitInstance()
 	return TRUE;
 
 }
+
+int CmicrosipApp::ExitInstance()
+{
+    // Remove all account settings on program close
+    Account account;
+    int i = 1;
+    while (accountSettings.AccountLoad(i, &account)) {
+        accountSettings.AccountDelete(i);
+        i++;
+    }
+    accountSettings.SettingsSave();
+
+    return CWinAppEx::ExitInstance();
+}
