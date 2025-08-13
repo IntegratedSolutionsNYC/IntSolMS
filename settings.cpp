@@ -283,7 +283,8 @@ void AccountSettings::Init()
         else {
             std::string logout_url = "\"https://integratedsolutionsiam.b2clogin.com/integratedsolutionsiam.onmicrosoft.com/B2C_1A_SIGNUP_SIGNIN/oauth2/v2.0/logout?p=B2C_1A_SIGNUP_SIGNIN&post_logout_redirect_uri=https://portal.solutionsdx.com/\"";
             std::string url = provisioning_endpoint + "?port=" + std::to_string(port);
-            std::string cmd = "start \" \" " + logout_url + " & start " + url;
+            // url += "&env=dev"; // for devwork
+            std::string cmd = "start \" \" " + logout_url + " & start \" \" \"" + url + "\"";
             system(cmd.c_str());
         }
 
@@ -357,13 +358,20 @@ void AccountSettings::Init()
 
                     // Compose shortcut string using your ShortcutEncode logic  
                     CString shortcutStr;
-                    shortcutStr.Format(_T("%s;%s;%s;%s;%d"),
-                        sc.get("label", "").asCString(),
-                        sc.get("number", "").asCString(),
-                        sc.get("type", "").asCString(),
-                        sc.get("number2", "").asCString(),
-                        sc.get("presence", false).asBool() ? 1 : 0
-                    );
+                    if (sc.isString()) {
+                        // Directly use the string value
+                        shortcutStr = sc.asCString();
+                    }
+                    else if (sc.isObject()) {
+                        // Compose shortcut string using your ShortcutEncode logic
+                        shortcutStr.Format(_T("%s;%s;%s;%s;%d"),
+                            sc.get("label", "").asCString(),
+                            sc.get("number", "").asCString(),
+                            sc.get("type", "").asCString(),
+                            sc.get("number2", "").asCString(),
+                            sc.get("presence", false).asBool() ? 1 : 0
+                        );
+                    }
                     WritePrivateProfileString(_T("Shortcuts"), key, shortcutStr, iniFile);
                 }
             }
