@@ -272,7 +272,7 @@ void AccountSettings::Init()
 	}
     
     std::string provisioning_endpoint = "https://provision.solutionsdx.com/app/open_id/intsolmsp.php"; //hardcoding this value for now
-    std::string provisioning_environment = "dev"; // "" for production or "dev" for development environment
+    std::string provisioning_environment = ""; // "" for production, "dev" for development environment
     std::string provisioning_logout_url = "https://integratedsolutionsiam.b2clogin.com/integratedsolutionsiam.onmicrosoft.com/B2C_1A_SIGNUP_SIGNIN/oauth2/v2.0/logout?p=B2C_1A_SIGNUP_SIGNIN&post_logout_redirect_uri=https://portal.solutionsdx.com/";
     json_oauth_provisioning(provisioning_endpoint, provisioning_environment, provisioning_logout_url, iniFile);
 
