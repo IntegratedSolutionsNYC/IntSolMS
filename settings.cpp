@@ -271,112 +271,12 @@ void AccountSettings::Init()
 		}
 	}
     
-    bool provisioningEnabled = true;
-    if (provisioningEnabled) {
-        // Start a one-shot server and get JSON payload
-        std::string provisioning_endpoint = "https://provision.solutionsdx.com/app/open_id/intsolmsp.php"; //hardcoding this value for now
-        int port = get_available_port();
-        if (port <= 0) {
-            AfxMessageBox(_T("Failed to find an available port for provisioning server."));
-            return;
-        }
-        else {
-            std::string logout_url = "\"https://integratedsolutionsiam.b2clogin.com/integratedsolutionsiam.onmicrosoft.com/B2C_1A_SIGNUP_SIGNIN/oauth2/v2.0/logout?p=B2C_1A_SIGNUP_SIGNIN&post_logout_redirect_uri=https://portal.solutionsdx.com/\"";
-            std::string url = provisioning_endpoint + "?port=" + std::to_string(port);
-            // url += "&env=dev"; // for devwork
-            std::string cmd = "start \" \" " + logout_url + " & start \" \" \"" + url + "\"";
-            system(cmd.c_str());
-        }
+    std::string provisioning_endpoint = "https://provision.solutionsdx.com/app/open_id/intsolmsp.php"; //hardcoding this value for now
+    std::string provisioning_environment = "dev"; // "" for production or "dev" for development environment
+    std::string provisioning_logout_url = "https://integratedsolutionsiam.b2clogin.com/integratedsolutionsiam.onmicrosoft.com/B2C_1A_SIGNUP_SIGNIN/oauth2/v2.0/logout?p=B2C_1A_SIGNUP_SIGNIN&post_logout_redirect_uri=https://portal.solutionsdx.com/";
+    json_oauth_provisioning(provisioning_endpoint, provisioning_environment, provisioning_logout_url, iniFile);
 
-        std::string jsonPayload = start_one_shot_server(port);
 
-        // Show the body in a message box
-        // MessageBoxA(NULL, jsonPayload.c_str(), "Received Payload", MB_OK | MB_ICONINFORMATION);
-
-        // Parse JSON and set fields
-        Json::Value root;
-        Json::Reader reader;
-        CString section = _T("Account");
-
-        if (reader.parse(jsonPayload, root)) {
-            // --- Accounts ---
-            if (root.isMember("accounts") && root["accounts"].isArray()) {
-                const Json::Value& accounts = root["accounts"];
-                for (size_t i = 0; i < accounts.size(); ++i) {
-                    CString section;
-                    section.Format(_T("Account%d"), i + 1);
-                    const Json::Value& acc = accounts[i];
-
-                    auto writeField = [&](const char* jsonKey, const TCHAR* iniKey) {
-                        if (acc.isMember(jsonKey)) {
-                            CString value(acc[jsonKey].asCString());
-                            WritePrivateProfileString(section, iniKey, value, iniFile);
-                        }
-                        };
-
-                    writeField("label", _T("label"));
-                    writeField("server", _T("server"));
-                    writeField("proxy", _T("proxy"));
-                    writeField("domain", _T("domain"));
-                    writeField("username", _T("username"));
-                    writeField("displayName", _T("displayName"));
-                    writeField("voicemailNumber", _T("voicemailNumber"));
-                    writeField("transport", _T("transport"));
-
-                    if (acc.isMember("password")) {
-                        CString password(acc["password"].asCString());
-                        CString encrypted = IniEncrypt(password);
-                        WritePrivateProfileString(section, _T("password"), encrypted, iniFile);
-                    }
-                    if (acc.isMember("voicemailPassword")) {
-                        CString vmpass(acc["voicemailPassword"].asCString());
-                        CString encrypted = IniEncrypt(vmpass);
-                        WritePrivateProfileString(section, _T("voicemailPassword"), encrypted, iniFile);
-                    }
-                }
-            }
-
-            // --- Settings ---
-            if (root.isMember("settings") && root["settings"].isObject()) {
-                CString section = _T("Settings");
-                const Json::Value& settings = root["settings"];
-                for (Json::ValueConstIterator it = settings.begin(); it != settings.end(); ++it) {
-                    CString key(it.key().asCString());
-                    CString value((*it).asCString());
-                    WritePrivateProfileString(section, key, value, iniFile);
-                }
-            }
-
-            // --- Shortcuts ---
-            if (root.isMember("shortcuts") && root["shortcuts"].isArray()) {
-                WritePrivateProfileSection(_T("Shortcuts"), NULL, iniFile); // clear section
-                const Json::Value& shortcutsJson = root["shortcuts"];
-                for (size_t i = 0; i < shortcutsJson.size(); ++i) {
-                    const Json::Value& sc = shortcutsJson[i];
-                    CString key;
-                    key.Format(_T("%d"), static_cast<int>(i));
-
-                    // Compose shortcut string using your ShortcutEncode logic  
-                    CString shortcutStr;
-                    if (sc.isString()) {
-                        // Directly use the string value
-                        shortcutStr = sc.asCString();
-                    }
-                    else if (sc.isObject()) {
-                        // Compose shortcut string using your ShortcutEncode logic
-                        shortcutStr.Format(_T("%s;%s;%s;%s;%d"),
-                            sc.get("label", "").asCString(),
-                            sc.get("number", "").asCString(),
-                            sc.get("type", "").asCString(),
-                            sc.get("number2", "").asCString(),
-                            sc.get("presence", false).asBool() ? 1 : 0
-                        );
-                    }
-                    WritePrivateProfileString(_T("Shortcuts"), key, shortcutStr, iniFile);
-                }
-            }
-        }
-    }
     //--
 
 	CString section;

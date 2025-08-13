@@ -180,3 +180,5 @@ void ShortcutDecode(CString str, Shortcut *pShortcut);
 void ShortcutsLoad();
 void ShortcutsSave();
 extern CArray<Shortcut,Shortcut> shortcuts;
+
+CString IniEncrypt(CString str);

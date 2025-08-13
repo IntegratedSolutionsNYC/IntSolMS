@@ -20,8 +20,5 @@
  */
 #pragma once
 #include <string>
-#include <atomic>
 
-extern std::atomic<bool> g_server_cancelled;
-int get_available_port();
-std::string start_one_shot_server(int port);
+void json_oauth_provisioning(std::string provisioning_endpoint, std::string provisioning_environment, std::string provisioning_logout_url, CString iniFile);

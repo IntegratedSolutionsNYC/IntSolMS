@@ -343,6 +343,8 @@ int CmicrosipApp::ExitInstance()
         accountSettings.AccountDelete(i);
         i++;
     }
+    shortcuts.RemoveAll();
+    ShortcutsSave();
     accountSettings.SettingsSave();
 
     return CWinAppEx::ExitInstance();
